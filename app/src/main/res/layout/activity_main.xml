@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp"
+    tools:context="com.example.myapplication.MainActivity">
+
+    <com.google.android.material.tabs.TabLayout
+        android:layout_width="312dp"
+        android:layout_height="192dp">
+        
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Traning" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pacemaker" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Competition" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:layout_margin="8dp">
+
+            <Button
+                android:id="@+id/start_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start"
+                android:onClick="onClickStart"
+                android:textSize="50sp" />
+
+            <Button
+                android:id="@+id/stop_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop"
+                android:onClick="onClickStop"
+
+                android:textSize="50sp" />
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp" >
+
+        <TextView
+            android:id="@+id/time_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_margin="5dp"/>
+        <TextView
+            android:id="@+id/primary_disctance_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00km"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_margin="5dp"/>
+
+        <TextView
+            android:id="@+id/second_disctance_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00km"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_margin="5dp"/>
+
+        <TextView
+            android:id="@+id/delta_time_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_margin="5dp"/>
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
