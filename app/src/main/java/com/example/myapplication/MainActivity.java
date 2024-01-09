@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         runTimer();
 
     }
-
     @Override
     public void onRequestPermissionsResult(int permsRequestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(permsRequestCode, permissions, grantResults);
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
     public void onClickStart(View view) {
         String myTitle = "myTitle";
 
