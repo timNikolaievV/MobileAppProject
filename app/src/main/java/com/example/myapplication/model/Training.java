@@ -1,29 +1,30 @@
 package com.example.myapplication.model;
 
-
-
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
-
 @Entity
 public class Training {
     @PrimaryKey(autoGenerate = true)
-    int id_training;
+    public long id_training;
     @ColumnInfo(name = "title")
-    String title;
+    public String title;
+    @ColumnInfo(name="startPoint")
+    public Point startPoint;
     @ColumnInfo(name = "startTime")
-    LocalDateTime startTime;
+    public LocalDateTime startTime;
     @ColumnInfo(name = "time")
-    long time;
+    public long time;
     @ColumnInfo(name = "distance")
-    double distance;
+    public double distance;
     @ColumnInfo(name = "speed")
-    double speed;
+    public double speed;
+    @ColumnInfo(name = "points")
+    public String points;
+
 
 
 }
