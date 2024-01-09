@@ -40,7 +40,7 @@ public class TrainingService {
     }
 
     private double calcPointsDistance(Point start, Point end){
-        float[] results = new float[0];
+        float[] results = new float[3];
         Location.distanceBetween(start.getLatitude(),start.getLongitude(),end.getLatitude(),end.getLongitude(),results);
 
         return results[0];
@@ -77,21 +77,21 @@ public class TrainingService {
         this.myTraining = myTraining;
         this.refTraining = refTraining;
         this.oppTraining = new TrainingWithPoints(refTraining.training) ;
-
+        this.oppTraining.points.add(refTraining.points.get(0));
     }
 
     public static TrainingWithPoints getNewRefTraining(double distance, long time, Point startPoint){
         TrainingWithPoints ref = new TrainingWithPoints(new Training(),new ArrayList<Point>());
         double speed = distance/time; //m/s
-        float[] results = new float[0];
-        Location.distanceBetween(startPoint.getLatitude(),startPoint.getLongitude(),startPoint.getLatitude()+1,startPoint.getLongitude(),results);
-        double deltaLatitude = (speed*1)/results[0];//1 sec
+        float[] results = new float[3];
+        Location.distanceBetween(startPoint.getLatitude(),startPoint.getLongitude(),startPoint.getLatitude()+0.01,startPoint.getLongitude(),results);
+        double deltaLatitude = (speed*1)*(0.01/results[0]);//1 sec
         double latitude = startPoint.getLatitude();
         double longtitude = startPoint.getLongitude();
         double altitude = startPoint.getAltitude();
 
         for(int i = 0; i<time;i++){
-            Point point = new Point(latitude, longtitude, altitude, time*1000);
+            Point point = new Point(latitude, longtitude, altitude, i*1000);
             latitude+=deltaLatitude;
             ref.points.add(point);
         }
@@ -99,6 +99,7 @@ public class TrainingService {
     }
 
     public double getRefDeltaLatitude(){
+        //TODO check point arrays
         return refTraining.points.get(1).getLatitude()-refTraining.points.get(0).getLatitude();
     }
 
