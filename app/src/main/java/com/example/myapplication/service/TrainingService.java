@@ -62,7 +62,7 @@ public class TrainingService {
             Point previousPoint = training.points.get(training.points.size() - 1);
             double pointsDistance = calcPointsDistance(previousPoint,point);
             training.training.distance += pointsDistance;
-            training.training.time = point.getTime()*1000;
+            training.training.time = point.getTime();
             //TODO find out how time is calculated
             //TODO calc speed using time
             training.training.speed = training.training.distance/training.training.time;

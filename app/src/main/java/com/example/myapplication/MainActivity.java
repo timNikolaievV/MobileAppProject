@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     TabLayout tabLayout;
     ViewPager viewPager;
     ViewPagerAdapter viewPagerAdapter;
+    View view;
 
     private int seconds = 0;
     private double distanceTotal = 0.0;
@@ -80,7 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
                 boolean locationAccepted1 = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 boolean locationAccepted2 = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                //startTrainig()
+                if (locationAccepted1 && locationAccepted2) {
+                    startTrainig();
+                }
                 break;
 
         }
@@ -89,62 +92,15 @@ public class MainActivity extends AppCompatActivity {
     public void onClickStart(View view) {
         List<Training> listOfTrainings = getTrainingsFromDB();
         Log.i("Info", listOfTrainings.toString());
+        this.view = view;
 
-        String myTitle = "Running";
 
         if (!checkPermission()) {
 
             requestPermission();
 
-        }
-//        else {
-//            startTrainig();
-//        }
-        if (checkPermission()) {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. Identify location with another app before using.
-                            try {
-                                if (location != null) {
-                                    Point point = new Point(location.getLatitude(),
-                                            location.getLongitude(),
-                                            location.getAltitude(),
-                                            0);
-
-                                    TrainingWithPoints myTraining = new TrainingWithPoints(myTitle+" "+LocalDateTime.now().toString(), LocalDateTime.now());
-                                    myTraining.points.add(point);
-
-                                    boolean isPacemaker = tabLayout.getSelectedTabPosition()==1;
-                                    if (isPacemaker) {
-                                        PacemakerFragment fragment = viewPagerAdapter.pacemakerFragment;
-                                        distanceTotal = (Double.parseDouble(fragment.getDistance())) * 1000;
-
-                                        long time = parseTimeToSeconds(fragment.getTime());
-
-                                        TrainingWithPoints refTraining = TrainingService.getNewRefTraining(distanceTotal, time, point);
-                                        trainingService.start(myTraining, refTraining);
-                                    } else {
-
-                                        //TODO get from UI
-                                        TrainingFragment fragment = viewPagerAdapter.trainingFragment;
-                                        Training training = fragment.getSelectedTraining();
-                                        TrainingWithPoints refTraining = TrainingMapper.trainingToTrainingWithPoints(training);
-                                        trainingService.start(myTraining, refTraining);
-                                    }
-                                    running = true;
-                                }
-                            } catch (Exception ex) {
-                                Log.e("Error", ex.toString());
-                            }
-                        }
-                    });
         } else {
-            String stringId = "Error";
-            Snackbar mySnackbar = Snackbar.make(view, stringId, 50);
-            mySnackbar.show();
-            return;//TODO no permision view
+            startTrainig();
         }
 
     }
@@ -176,8 +132,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void runTimer() {
-        //if mock = true Latitude changes autmaticly.
-        final boolean mock = true;
+        final boolean mock=true;
+//
+//        if (mock == true) {
+//
+//        } //Latitude changes automaticaly.
+
 
         final TextView cordinateView = (TextView) findViewById(
                 R.id.cordinate_view);
@@ -212,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                                             Point point = new Point(location.getLatitude(),
                                                     location.getLongitude(),
                                                     location.getAltitude(),
-                                                    seconds * 1000);
+                                                    seconds*1000);
                                             if (mock) {
                                                 double deltaLatitude = trainingService.getRefDeltaLatitude();
                                                 point.setLatitude(point.getLatitude() + deltaLatitude * seconds);
@@ -267,6 +227,55 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startTrainig() {
+        String myTitle = "Running";
+
+        if (checkPermission()) {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. Identify location with another app before using.
+                            try {
+                                if (location != null) {
+                                    Point point = new Point(location.getLatitude(),
+                                            location.getLongitude(),
+                                            location.getAltitude(),
+                                            0);
+
+                                    TrainingWithPoints myTraining = new TrainingWithPoints(myTitle + " " + LocalDateTime.now().toString(), LocalDateTime.now());
+                                    myTraining.points.add(point);
+
+                                    boolean isPacemaker = tabLayout.getSelectedTabPosition() == 1;
+                                    if (isPacemaker) {
+                                        PacemakerFragment fragment = viewPagerAdapter.pacemakerFragment;
+                                        distanceTotal = (Double.parseDouble(fragment.getDistance())) * 1000;
+
+                                        long time = parseTimeToSeconds(fragment.getTime());
+
+                                        TrainingWithPoints refTraining = TrainingService.getNewRefTraining(distanceTotal, time, point);
+                                        trainingService.start(myTraining, refTraining);
+                                    } else {
+
+                                        //TODO get from UI
+                                        TrainingFragment fragment = viewPagerAdapter.trainingFragment;
+                                        Training training = fragment.getSelectedTraining();
+                                        TrainingWithPoints refTraining = TrainingMapper.trainingToTrainingWithPoints(training);
+                                        distanceTotal = training.distance;
+                                        trainingService.start(myTraining, refTraining);
+                                    }
+                                    running = true;
+                                }
+                            } catch (Exception ex) {
+                                Log.e("Error", ex.toString());
+                            }
+                        }
+                    });
+        } else {
+            String stringId = "Error";
+            Snackbar mySnackbar = Snackbar.make(view, stringId, 50);
+            mySnackbar.show();
+            return;//TODO no permision view
+        }
     }
 
     private void saveTrainingToDB(TrainingWithPoints trainingWithPoints) {
