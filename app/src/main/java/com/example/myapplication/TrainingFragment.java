@@ -72,7 +72,7 @@ public class TrainingFragment extends Fragment {
 
     public Training getSelectedTraining() {
 
-        if (currentPosition > 0) {
+        if (currentPosition >= 0) {
             return trainigs.get(currentPosition);
         }
         return null;

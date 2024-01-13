@@ -1,24 +1,20 @@
 package com.example.myapplication;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentResultListener;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.room.Room;
 import androidx.viewpager.widget.ViewPager;
 
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myapplication.model.Point;
 import com.example.myapplication.model.Training;
@@ -26,7 +22,6 @@ import com.example.myapplication.model.TrainingWithPoints;
 import com.example.myapplication.persistence.TrainingDAO;
 import com.example.myapplication.persistence.TrainingDB;
 import com.example.myapplication.service.TrainingMapper;
-import com.example.myapplication.service.TrainingService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -43,14 +38,15 @@ public class MainActivity extends AppCompatActivity {
     ViewPager viewPager;
     ViewPagerAdapter viewPagerAdapter;
     View view;
+    MainViewModel viewModel;
 
-    private int seconds = 0;
+   // private int seconds = 0;
     private double distanceTotal = 0.0;
     // Is the stopwatch running?
     private boolean running;
     private static final int PERMISSION_REQUEST_CODE = 200;
     private FusedLocationProviderClient fusedLocationClient;
-    private TrainingService trainingService = new TrainingService();
+    //private TrainingService trainingService = new TrainingService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +54,44 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tabs);
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
+        viewModel.getSeconds().observe(this, seconds -> {
+            int hours = seconds / 3600;
+            int minutes = (seconds % 3600) / 60;
+            int secs = seconds % 60;
+
+            String time = String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs);
+
+            final TextView timeView = (TextView) findViewById(R.id.time_view);
+            timeView.setText(time);
+        });
+
+        viewModel.getMyTraining().observe(this, myTraining -> {
+            final TextView primarySpeed = (TextView) findViewById(R.id.primary_speed);
+            final TextView primaryDisctanceView = (TextView) findViewById(R.id.primary_disctance_view);
+            final ProgressBar primaryProgressBar = (ProgressBar) findViewById(R.id.primay_progress_bar);
+
+            myTraining.training.distance = Math.round(myTraining.training.distance * 100.0) / 100.0;
+            myTraining.training.speed = Math.round(myTraining.training.speed * 100.0) / 100.0;
+
+            primaryDisctanceView.setText(Double.toString(myTraining.training.distance));
+            primarySpeed.setText(Double.toString(myTraining.training.speed));
+
+            primaryProgressBar.setProgress((int) ((100 * myTraining.training.distance) / distanceTotal));
+        });
+        viewModel.getOppTraining().observe(this, oppTraining -> {
+            final TextView secondDisctanceView = (TextView) findViewById(R.id.second_disctance_view);
+            final TextView deltaTimeView = (TextView) findViewById(R.id.delta_time_view);
+            final ProgressBar secondProgressBar = (ProgressBar) findViewById(R.id.second_progress_bar);
+
+            oppTraining.training.distance = Math.round(oppTraining.training.distance * 100.0) / 100.0;
+            secondDisctanceView.setText(Double.toString(oppTraining.training.distance));
+            // deltaTimeView.setText(Double.toString(myTraining.training.time - oppTraining.training.time));
+
+            secondProgressBar.setProgress((int) ((100 * oppTraining.training.distance) / distanceTotal));
+
+        });
 
         viewPagerAdapter = new ViewPagerAdapter(
                 getSupportFragmentManager());
@@ -132,26 +166,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void runTimer() {
-        final boolean mock=true;
+        final boolean mock = true;
 //
 //        if (mock == true) {
 //
 //        } //Latitude changes automaticaly.
 
-
-        final TextView cordinateView = (TextView) findViewById(
-                R.id.cordinate_view);
-        // Get the text view.
-        final TextView timeView
-                = (TextView) findViewById(
-                R.id.time_view);
-
-        final TextView primaryDisctanceView = (TextView) findViewById(R.id.primary_disctance_view);
-        final TextView secondDisctanceView = (TextView) findViewById(R.id.second_disctance_view);
-        final TextView deltaTimeView = (TextView) findViewById(R.id.delta_time_view);
-
-        final ProgressBar primaryProgressBar = (ProgressBar) findViewById(R.id.primay_progress_bar);
-        final ProgressBar secondProgressBar = (ProgressBar) findViewById(R.id.second_progress_bar);
 
         // Creates a new Handler
         final Handler handler
@@ -163,56 +183,38 @@ public class MainActivity extends AppCompatActivity {
 
                 if (running && checkPermission()) {
                     fusedLocationClient.getLastLocation()
-                            .addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-                                @Override
-                                public void onSuccess(Location location) {
-                                    try {
-                                        // Got last known location. In some rare situations this can be null.
-                                        if (location != null) {
-                                            Point point = new Point(location.getLatitude(),
-                                                    location.getLongitude(),
-                                                    location.getAltitude(),
-                                                    seconds*1000);
-                                            if (mock) {
-                                                double deltaLatitude = trainingService.getRefDeltaLatitude();
-                                                point.setLatitude(point.getLatitude() + deltaLatitude * seconds);
-                                            }
-                                            cordinateView.setText(point.toString());
-                                            trainingService.addMyPoint(point);
-                                            TrainingWithPoints myTraining = trainingService.getMyTraining();
-                                            TrainingWithPoints oppTraining = trainingService.getOppTraining();
-                                            //TODO format distance and speed
-                                            primaryDisctanceView.setText(Double.toString(myTraining.training.distance));
-                                            secondDisctanceView.setText(Double.toString(oppTraining.training.distance));
-                                            deltaTimeView.setText(Double.toString(myTraining.training.distance - oppTraining.training.distance));
-
-                                            primaryProgressBar.setProgress((int) ((100 * myTraining.training.distance) / distanceTotal));
-                                            secondProgressBar.setProgress((int) ((100 * oppTraining.training.distance) / distanceTotal));
-
-                                            if (myTraining.training.distance >= distanceTotal) {
-                                                stopTraining();
-                                            }
+                            .addOnSuccessListener(MainActivity.this, location -> {
+                                try {
+                                    // Got last known location. In some rare situations this can be null.
+                                    if (location != null) {
+                                        int seconds = viewModel.getSeconds().getValue();
+                                        Point point = new Point(location.getLatitude(),
+                                                location.getLongitude(),
+                                                location.getAltitude(),
+                                                seconds * 1000);
+                                        if (mock) {
+                                            double deltaLatitude = viewModel.getRefDeltaLatitude();
+                                            point.setLatitude(point.getLatitude() + deltaLatitude * seconds);
                                         }
-                                    } catch (Exception ex) {
-                                        Log.e("Error", ex.toString());
+                                        viewModel.addMyPoint(point);
+//                                            viewModel.setMyTrainingLiveData(trainingService.getMyTraining());
+//                                            viewModel.setOppTrainingLiveData(trainingService.getOppTraining());
+
+                                        if (viewModel.getMyTraining().getValue().training.distance >= distanceTotal) {
+                                            stopTraining();
+                                        }
                                     }
+                                } catch (Exception ex) {
+                                    Log.e("Error", ex.toString());
                                 }
                             });
                 }
-                int hours = seconds / 3600;
-                int minutes = (seconds % 3600) / 60;
-                int secs = seconds % 60;
 
-                String time
-                        = String
-                        .format(Locale.getDefault(),
-                                "%d:%02d:%02d", hours,
-                                minutes, secs);
-
-                timeView.setText(time);
 
                 if (running) {
-                    seconds++;
+                    //TODO change seconds
+                    int seconds = viewModel.getSeconds().getValue();
+                    viewModel.setSeconds(seconds+1);
                 }
                 handler.postDelayed(this, 1000);
             }
@@ -222,7 +224,9 @@ public class MainActivity extends AppCompatActivity {
     private void stopTraining() {
         if (running) {
             running = false;
-            saveTrainingToDB(trainingService.getMyTraining());
+            saveTrainingToDB(viewModel.getMyTraining().getValue());
+            Toast.makeText(getApplicationContext(), "Training is finished", Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -231,43 +235,44 @@ public class MainActivity extends AppCompatActivity {
 
         if (checkPermission()) {
             fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. Identify location with another app before using.
-                            try {
-                                if (location != null) {
-                                    Point point = new Point(location.getLatitude(),
-                                            location.getLongitude(),
-                                            location.getAltitude(),
-                                            0);
+                    .addOnSuccessListener(MainActivity.this, location -> {
+                        // Got last known location. Identify location with another app before using.
+                        try {
+                            if (location != null) {
+                                Point point = new Point(location.getLatitude(),
+                                        location.getLongitude(),
+                                        location.getAltitude(),
+                                        0);
 
-                                    TrainingWithPoints myTraining = new TrainingWithPoints(myTitle + " " + LocalDateTime.now().toString(), LocalDateTime.now());
-                                    myTraining.points.add(point);
+                                TrainingWithPoints myTraining = new TrainingWithPoints(myTitle + " " + LocalDateTime.now().toString(), LocalDateTime.now());
+                                myTraining.points.add(point);
 
-                                    boolean isPacemaker = tabLayout.getSelectedTabPosition() == 1;
-                                    if (isPacemaker) {
-                                        PacemakerFragment fragment = viewPagerAdapter.pacemakerFragment;
-                                        distanceTotal = (Double.parseDouble(fragment.getDistance())) * 1000;
+                                boolean isPacemaker = tabLayout.getSelectedTabPosition() == 1;
+                                if (isPacemaker) {
+                                    PacemakerFragment fragment = viewPagerAdapter.pacemakerFragment;
+                                    distanceTotal = (Double.parseDouble(fragment.getDistance())) * 1000;
 
-                                        long time = parseTimeToSeconds(fragment.getTime());
+                                    long time = parseTimeToSeconds(fragment.getTime());
 
-                                        TrainingWithPoints refTraining = TrainingService.getNewRefTraining(distanceTotal, time, point);
-                                        trainingService.start(myTraining, refTraining);
-                                    } else {
+                                    TrainingWithPoints refTraining = MainViewModel.getNewRefTraining(distanceTotal, time, point);
+                                    viewModel.start(myTraining, refTraining);
+                                } else {
 
-                                        //TODO get from UI
-                                        TrainingFragment fragment = viewPagerAdapter.trainingFragment;
-                                        Training training = fragment.getSelectedTraining();
-                                        TrainingWithPoints refTraining = TrainingMapper.trainingToTrainingWithPoints(training);
-                                        distanceTotal = training.distance;
-                                        trainingService.start(myTraining, refTraining);
+                                    //TODO get from UI
+                                    TrainingFragment fragment = viewPagerAdapter.trainingFragment;
+                                    Training training = fragment.getSelectedTraining();
+                                    if (training == null) {
+                                        Toast.makeText(getApplicationContext(), "Select training from the list", Toast.LENGTH_SHORT).show();
+                                        return;
                                     }
-                                    running = true;
+                                    TrainingWithPoints refTraining = TrainingMapper.trainingToTrainingWithPoints(training);
+                                    distanceTotal = training.distance;
+                                    viewModel.start(myTraining, refTraining);
                                 }
-                            } catch (Exception ex) {
-                                Log.e("Error", ex.toString());
+                                running = true;
                             }
+                        } catch (Exception ex) {
+                            Log.e("Error", ex.toString());
                         }
                     });
         } else {
