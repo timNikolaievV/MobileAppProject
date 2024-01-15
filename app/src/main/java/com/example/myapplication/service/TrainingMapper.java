@@ -10,16 +10,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TrainingMapper {
-    public static Training trainingWithPointsToTraining(TrainingWithPoints trainingWithPoints){
+    public static Training trainingWithPointsToTraining(TrainingWithPoints trainingWithPoints) {
         Training training = trainingWithPoints.training;
         training.points = new Gson().toJson(trainingWithPoints.points);
-        return  training;
+        return training;
     }
 
-    public static TrainingWithPoints trainingToTrainingWithPoints(Training training){
-        Point[] points = new Gson().fromJson(training.points,Point[].class);
+    public static TrainingWithPoints trainingToTrainingWithPoints(Training training) {
+        Point[] points = new Gson().fromJson(training.points, Point[].class);
         TrainingWithPoints trainingWithPoints = new TrainingWithPoints(training, Arrays.asList(points));
-        return  trainingWithPoints;
+        return trainingWithPoints;
     }
 
 

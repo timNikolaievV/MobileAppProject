@@ -38,7 +38,7 @@ public class TrainingFragment extends Fragment {
         List<String> trainingsTitle = new ArrayList<>();
         for (Training training : trainigs
         ) {
-            trainingsTitle.add(training.title+":"+training.id_training);
+            trainingsTitle.add(training.title + ":" + training.id_training);
 
         }
         simpleList = (ListView) getActivity().findViewById(R.id.training_list_view);
@@ -50,7 +50,6 @@ public class TrainingFragment extends Fragment {
 
                 Object listItem = simpleList.getItemAtPosition(position);
                 currentPosition = position;
-//          getActivity().getApplicationContext(),"Click ListItem Number"+listItem.getString(), Toast.LENGTH_LONG;
             }
         });
 

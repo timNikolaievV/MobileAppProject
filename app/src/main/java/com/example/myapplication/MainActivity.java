@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     View view;
     MainViewModel viewModel;
 
-   // private int seconds = 0;
+    // private int seconds = 0;
     private double distanceTotal = 0.0;
     // Is the stopwatch running?
     private boolean running;
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         });
         viewModel.getOppTraining().observe(this, oppTraining -> {
             final TextView secondDisctanceView = (TextView) findViewById(R.id.second_disctance_view);
-            final TextView deltaTimeView = (TextView) findViewById(R.id.delta_time_view);
+            //final TextView deltaTimeView = (TextView) findViewById(R.id.delta_time_view);
             final ProgressBar secondProgressBar = (ProgressBar) findViewById(R.id.second_progress_bar);
 
             oppTraining.training.distance = Math.round(oppTraining.training.distance * 100.0) / 100.0;
@@ -167,13 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void runTimer() {
         final boolean mock = true;
-//
-//        if (mock == true) {
-//
-//        } //Latitude changes automaticaly.
 
-
-        // Creates a new Handler
         final Handler handler
                 = new Handler();
 
@@ -197,8 +191,6 @@ public class MainActivity extends AppCompatActivity {
                                             point.setLatitude(point.getLatitude() + deltaLatitude * seconds);
                                         }
                                         viewModel.addMyPoint(point);
-//                                            viewModel.setMyTrainingLiveData(trainingService.getMyTraining());
-//                                            viewModel.setOppTrainingLiveData(trainingService.getOppTraining());
 
                                         if (viewModel.getMyTraining().getValue().training.distance >= distanceTotal) {
                                             stopTraining();
@@ -210,11 +202,9 @@ public class MainActivity extends AppCompatActivity {
                             });
                 }
 
-
                 if (running) {
-                    //TODO change seconds
                     int seconds = viewModel.getSeconds().getValue();
-                    viewModel.setSeconds(seconds+1);
+                    viewModel.setSeconds(seconds + 1);
                 }
                 handler.postDelayed(this, 1000);
             }
@@ -244,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                                         location.getAltitude(),
                                         0);
 
-                                TrainingWithPoints myTraining = new TrainingWithPoints(myTitle + " " + LocalDateTime.now().toString(), LocalDateTime.now());
+                                TrainingWithPoints myTraining = new TrainingWithPoints(myTitle + " " + LocalDateTime.now().toString());
                                 myTraining.points.add(point);
 
                                 boolean isPacemaker = tabLayout.getSelectedTabPosition() == 1;
@@ -258,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                                     viewModel.start(myTraining, refTraining);
                                 } else {
 
-                                    //TODO get from UI
+
                                     TrainingFragment fragment = viewPagerAdapter.trainingFragment;
                                     Training training = fragment.getSelectedTraining();
                                     if (training == null) {
@@ -279,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
             String stringId = "Error";
             Snackbar mySnackbar = Snackbar.make(view, stringId, 50);
             mySnackbar.show();
-            return;//TODO no permision view
+            return;
         }
     }
 

@@ -85,17 +85,17 @@ public class MainViewModel extends ViewModel {
     }
 
     public double getRefDeltaLatitude() {
-        //TODO check point arrays
         return refTraining.points.get(1).getLatitude() - refTraining.points.get(0).getLatitude();
     }
 
 
     private Point getOppPoint(long time) {
+        //TODO in case of real oponent get current position web API
         Optional<Point> point = refTraining.points.stream().filter(x -> x.getTime() >= time).findFirst();
         if (point.isPresent()) {
             return point.get();
         }
-        return refTraining.points.get(refTraining.points.size()-1);
+        return refTraining.points.get(refTraining.points.size() - 1);
     }
 
     private TrainingWithPoints addPointToTraining(Point point, TrainingWithPoints training) {
