@@ -57,6 +57,7 @@ public class MainViewModel extends ViewModel {
     }
 
     public void start(TrainingWithPoints myTraining, TrainingWithPoints refTraining) {
+        secondsLiveData.setValue(0);
         myTrainingLiveData.postValue(myTraining);
         this.refTraining = refTraining;
         TrainingWithPoints oppTraining = new TrainingWithPoints(refTraining.training);
@@ -90,7 +91,7 @@ public class MainViewModel extends ViewModel {
 
 
     private Point getOppPoint(long time) {
-        //TODO in case of real oponent get current position web API
+
         Optional<Point> point = refTraining.points.stream().filter(x -> x.getTime() >= time).findFirst();
         if (point.isPresent()) {
             return point.get();

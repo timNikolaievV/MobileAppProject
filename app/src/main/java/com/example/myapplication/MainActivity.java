@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     // private int seconds = 0;
     private double distanceTotal = 0.0;
-    // Is the stopwatch running?
+
     private boolean running;
     private static final int PERMISSION_REQUEST_CODE = 200;
     private FusedLocationProviderClient fusedLocationClient;
@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager());
         viewPager.setAdapter(viewPagerAdapter);
 
-        // It is used to join TabLayout with ViewPager.
         tabLayout.setupWithViewPager(viewPager);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
